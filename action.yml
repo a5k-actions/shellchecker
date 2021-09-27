@@ -1,0 +1,39 @@
+name: 'ShellChecker'
+author: 'ale5000'
+description: 'GitHub action to execute a lint check of shell scripts using ShellCheck.'
+inputs:
+  shellcheck-version:
+    description: 'Specify the version of ShellCheck to use. Possible values: [stable, latest, v0.7.2, etc.] Default: [stable]'
+    required: false
+    default: 'stable'
+  severity:
+    description: 'Specify the minimum severity of issues to display. Possible values: [error, warning, info, style] Default: [style]'
+    required: false
+    default: 'style'
+  #ignore:
+    #description: 'Paths to ignore'
+    #required: false
+    #default: ''
+runs:
+  using: 'composite'
+  steps:
+    - name: Download ShellCheck
+      shell: bash
+      run: |
+        # Download ShellCheck
+        current_os='linux'
+        scversion="${{ inputs.shellcheck-version }}"
+        wget -qO- "https://github.com/koalaman/shellcheck/releases/download/${scversion?}/shellcheck-${scversion?}.${current_os?}.x86_64.tar.xz" | tar -xJv
+        mv -f "./shellcheck-${scversion?}/shellcheck" "${{ github.action_path }}/shellcheck"
+        rm -rf "./shellcheck-${scversion?}"
+    - name: Display ShellCheck version
+      shell: bash
+      run: '"${{ github.action_path }}/shellcheck" --version'
+    - name: Execute ShellCheck scan
+      shell: bash
+      run: |
+        # Execute ShellCheck scan
+        find . -type f -iregex '.*\.sh$\|.*\.bash$\|.*\.dash$\|.*\.ksh$' | while read -r FILE; do 
+          echo "Currently scanning: $FILE"
+          "${{ github.action_path }}/shellcheck" --color=always -S "${{ inputs.severity }}" -x "$FILE"
+        done

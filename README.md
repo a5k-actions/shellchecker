@@ -1,2 +1,0 @@
-# shellchecker
-ShellChecker
