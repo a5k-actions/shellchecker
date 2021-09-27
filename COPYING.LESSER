@@ -1,0 +1,1 @@
+./LICENSE.LESSER.rst
