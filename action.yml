@@ -3,37 +3,71 @@ author: 'ale5000'
 description: 'GitHub action to execute a lint check of shell scripts using ShellCheck.'
 inputs:
   shellcheck-version:
-    description: 'Specify the version of ShellCheck to use. Possible values: [stable, latest, v0.7.2, etc.] Default: [stable]'
+    description: 'Version of ShellCheck to use. Possible values: [stable, latest, v0.7.2, etc.] Default: [stable]'
     required: false
     default: 'stable'
   severity:
-    description: 'Specify the minimum severity of issues to display. Possible values: [error, warning, info, style] Default: [style]'
+    description: 'Minimum severity of issues to display. Possible values: [error, warning, info, style] Default: [style]'
     required: false
     default: 'style'
-  #ignore:
-    #description: 'Paths to ignore'
-    #required: false
-    #default: ''
+  ignore-files:
+    description: 'List of files to ignore. Separator: |'
+    required: false
 runs:
   using: 'composite'
   steps:
+    - name: Set up matcher
+      shell: bash
+      run: |
+        # Set up matcher...
+        matcher_file="${{ github.action_path }}/.github/matchers/tty/shellcheck-matcher.json"
+        if test -f "${matcher_file}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher configured.'; fi
     - name: Download ShellCheck
       shell: bash
       run: |
-        # Download ShellCheck
+        # Download ShellCheck...
         current_os='linux'
         scversion="${{ inputs.shellcheck-version }}"
-        wget -qO- "https://github.com/koalaman/shellcheck/releases/download/${scversion?}/shellcheck-${scversion?}.${current_os?}.x86_64.tar.xz" | tar -xJv
+        wget -qO- "https://github.com/koalaman/shellcheck/releases/download/${scversion?}/shellcheck-${scversion?}.${current_os?}.x86_64.tar.xz" | tar -xJv 1>/dev/null
         mv -f "./shellcheck-${scversion?}/shellcheck" "${{ github.action_path }}/shellcheck"
         rm -rf "./shellcheck-${scversion?}"
     - name: Display ShellCheck version
       shell: bash
-      run: '"${{ github.action_path }}/shellcheck" --version'
-    - name: Execute ShellCheck scan
-      shell: bash
       run: |
-        # Execute ShellCheck scan
-        find . -type f -iregex '.*\.sh$\|.*\.bash$\|.*\.dash$\|.*\.ksh$' | while read -r FILE; do 
-          echo "Currently scanning: $FILE"
-          "${{ github.action_path }}/shellcheck" --color=always -S "${{ inputs.severity }}" -x "$FILE"
+        # Display ShellCheck version...
+        "${{ github.action_path }}/shellcheck" --version
+    - name: Execute ShellCheck scan
+      shell: bash {0}
+      run: |
+        # Execute ShellCheck scan...
+        sc_params=()
+        sc_params+=("--color")
+        sc_params+=("-S"); sc_params+=("${{ inputs.severity }}")
+        if test "${{ github.event_name }}" != 'pull_request'; then sc_params+=("-x"); fi
+
+        ignore_string="${{ inputs.ignore-files }}"
+        ignore_list=()
+        if test -n "$ignore_string"; then
+          OLDIFS="$IFS"
+          IFS='|'
+          read -a ignore_list <<< "${ignore_string}"
+          IFS="$OLDIFS"
+        fi
+
+        find '.' -type f \! -path './.git/*' | while read -r FILE; do
+          echo '################################################################################'
+          FILE_LOWER="$(echo "${FILE}" | tr '[:upper:]' '[:lower:]')"
+          to_ignore=false
+          for ELEM in "${ignore_list[@]}"; do
+            if [[ "${FILE}" == *"/${ELEM}" ]]; then to_ignore=true; break; fi
+          done
+
+          if $to_ignore; then
+            echo "Ignored: $FILE"
+          elif expr "$FILE_LOWER" : '^.*\.\(sh\|bash\|ash\|dash\|ksh\)$' 1>/dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
+            echo "Currently scanning: $FILE"
+            "${{ github.action_path }}/shellcheck" "${sc_params[@]}" "$FILE"
+          else
+            echo "Skipped: $FILE"
+          fi
         done
