@@ -11,15 +11,15 @@ branding:
 
 inputs:
   shellcheck-version:
-    description: 'Version of ShellCheck to use. Possible values: [stable, latest, v0.7.2, etc.] Default: [stable]'
+    description: 'Version of ShellCheck to use. Values: [stable, latest, v0.7.2, etc.]. Default: [stable]'
     required: false
     default: 'stable'
   severity:
-    description: 'Minimum severity of issues to display. Possible values: [error, warning, info, style] Default: [style]'
+    description: 'Minimum severity of issues to display. Values: [error, warning, info, style]. Default: [style]'
     required: false
     default: 'style'
   ignore-files:
-    description: 'List of files to ignore. Separator: |'
+    description: 'List of files to ignore, the separator is |'
     required: false
 runs:
   using: 'composite'
@@ -27,27 +27,41 @@ runs:
     - name: Set up matcher
       shell: bash
       run: |
-        # Set up matcher...
+        # Setting up matcher...
         matcher_file="${{ github.action_path }}/.github/matchers/tty/shellcheck-matcher.json"
         if test -f "${matcher_file}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher configured.'; fi
     - name: Download ShellCheck
       shell: bash
       run: |
-        # Download ShellCheck...
-        current_os='linux'
-        scversion="${{ inputs.shellcheck-version }}"
-        wget -qO- "https://github.com/koalaman/shellcheck/releases/download/${scversion?}/shellcheck-${scversion?}.${current_os?}.x86_64.tar.xz" | tar -xJv 1>/dev/null
-        mv -f "./shellcheck-${scversion?}/shellcheck" "${{ github.action_path }}/shellcheck"
-        rm -rf "./shellcheck-${scversion?}"
+        # Downloading ShellCheck...
+        annotate_error() { echo "::error file=action.yml,line=$2,col=1,endColumn=50::Error $1 on line $2"; exit "$1"; }
+
+        case "${{ runner.os }}" in 'Linux') current_os='linux';; 'macOS') current_os='darwin';; 'Windows') current_os='win';; *) annotate_error 1 38; esac
+        action_path="${{ github.action_path }}"
+        sc_ver="${{ inputs.shellcheck-version }}"
+        base_url="https://github.com/koalaman/shellcheck/releases/download/${sc_ver?}/"
+        if test "${current_os}" = 'win'; then archive_name="shellcheck-${sc_ver?}.zip"; else archive_name="shellcheck-${sc_ver?}.${current_os?}.x86_64.tar.xz"; fi
+
+        ## Installing wget (only on Windows)...
+        if test "${current_os}" = 'win'; then choco install --no-progress --yes wget 1>/dev/null || annotate_error 2 45; fi
+
+        wget -q -O "${archive_name?}" "${base_url?}${archive_name?}" || annotate_error 3 47
+        if test "${current_os}" = 'win'; then
+          unzip -ojq "${archive_name?}" '*' -d "./shellcheck-${sc_ver?}/" || annotate_error 4 49
+        else
+          tar -xf "${archive_name?}" || annotate_error 4 51
+        fi
+        mv -f "./shellcheck-${sc_ver?}/shellcheck"* "${action_path?}/" || annotate_error 5 53
+        rm -f "./${archive_name?}"; rm -rf "./shellcheck-${sc_ver?}"
     - name: Display ShellCheck version
       shell: bash
       run: |
-        # Display ShellCheck version...
+        # Displaying ShellCheck version...
         "${{ github.action_path }}/shellcheck" --version
     - name: Execute ShellCheck scan
       shell: bash {0}
       run: |
-        # Execute ShellCheck scan...
+        # Executing ShellCheck scan...
         sc_params=()
         sc_params+=("--color")
         sc_params+=("-S"); sc_params+=("${{ inputs.severity }}")
