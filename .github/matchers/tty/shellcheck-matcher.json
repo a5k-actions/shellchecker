@@ -1,18 +1,18 @@
 {
   "problemMatcher": [
     {
-      "owner": "shellcheck-matcher",
+      "owner": "shellcheck-matcher-colors",
       "pattern": [
         {
-          "regexp": "^(?:\\033[^m]+m)?In\\s(.+?)\\sline\\s(\\d+):(?:\\033[^m]+m)?$",
+          "regexp": "^\\033[^m]+mIn (.+?) line (\\d+):\\033[^m]+m$",
           "file": 1,
           "line": 2
         },
         {
-          "regexp": ""
+          "regexp": "^\\033\\[0"
         },
         {
-          "regexp": "(SC\\d{4}):\\s(.+?)(?:\\033[^m]+m)?$",
+          "regexp": "(SC\\d{4}): (.+)\\033[^m]+m$",
           "code": 1,
           "message": 2,
           "loop": true
