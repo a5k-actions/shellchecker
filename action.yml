@@ -24,13 +24,13 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Set up matcher
+    - name: "Set up matcher"
       shell: bash
       run: |
         # Setting up matcher...
         matcher_file="${{ github.action_path }}/.github/matchers/tty/shellcheck-matcher.json"
         if test -f "${matcher_file}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher configured.'; fi
-    - name: Download ShellCheck
+    - name: "Download ShellCheck"
       shell: bash
       run: |
         # Downloading ShellCheck...
@@ -53,12 +53,12 @@ runs:
         fi
         mv -f "./shellcheck-${sc_ver?}/shellcheck"* "${action_path?}/" || annotate_error 5 53
         rm -f "./${archive_name?}"; rm -rf "./shellcheck-${sc_ver?}"
-    - name: Display ShellCheck version
+    - name: "Display ShellCheck version"
       shell: bash
       run: |
         # Displaying ShellCheck version...
         "${{ github.action_path }}/shellcheck" --version
-    - name: Execute ShellCheck scan
+    - name: "Execute ShellCheck scan"
       shell: bash {0}
       run: |
         # Executing ShellCheck scan...
