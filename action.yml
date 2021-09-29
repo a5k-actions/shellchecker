@@ -6,7 +6,7 @@ name: 'ShellChecker'
 author: 'ale5000'
 description: 'GitHub action to execute a lint check of shell scripts using ShellCheck.'
 branding:
-  icon: 'tool'
+  icon: 'check-circle'
   color: 'green'
 
 inputs:
