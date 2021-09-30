@@ -36,22 +36,22 @@ runs:
         # Downloading ShellCheck...
         annotate_error() { echo "::error file=action.yml,line=$2,col=1,endColumn=50::Error $1 on line $2"; exit "$1"; }
 
-        case "${{ runner.os }}" in 'Linux') current_os='linux';; 'macOS') current_os='darwin';; 'Windows') current_os='win';; *) annotate_error 1 38; esac
+        case "${{ runner.os }}" in 'Linux') current_os='linux';; 'macOS') current_os='darwin';; 'Windows') current_os='win';; *) annotate_error 1 39; esac
         action_path="${{ github.action_path }}"
         sc_ver="${{ inputs.shellcheck-version }}"
         base_url="https://github.com/koalaman/shellcheck/releases/download/${sc_ver?}/"
         if test "${current_os}" = 'win'; then archive_name="shellcheck-${sc_ver?}.zip"; else archive_name="shellcheck-${sc_ver?}.${current_os?}.x86_64.tar.xz"; fi
 
         ## Installing wget (only on Windows)...
-        if test "${current_os}" = 'win'; then choco install --no-progress --yes wget 1>/dev/null || annotate_error 2 45; fi
+        if test "${current_os}" = 'win'; then choco install --no-progress --yes wget 1>/dev/null || annotate_error 2 46; fi
 
-        wget -q -O "${archive_name?}" "${base_url?}${archive_name?}" || annotate_error 3 47
+        wget -q -O "${archive_name?}" "${base_url?}${archive_name?}" || annotate_error 3 48
         if test "${current_os}" = 'win'; then
-          unzip -ojq "${archive_name?}" '*' -d "./shellcheck-${sc_ver?}/" || annotate_error 4 49
+          unzip -ojq "${archive_name?}" '*' -d "./shellcheck-${sc_ver?}/" || annotate_error 4 50
         else
-          tar -xf "${archive_name?}" || annotate_error 4 51
+          tar -xf "${archive_name?}" || annotate_error 4 52
         fi
-        mv -f "./shellcheck-${sc_ver?}/shellcheck"* "${action_path?}/" || annotate_error 5 53
+        mv -f "./shellcheck-${sc_ver?}/shellcheck"* "${action_path?}/" || annotate_error 5 54
         rm -f "./${archive_name?}"; rm -rf "./shellcheck-${sc_ver?}"
     - name: "Display ShellCheck version"
       shell: bash
@@ -72,11 +72,14 @@ runs:
         if test -n "$ignore_string"; then
           OLDIFS="$IFS"
           IFS='|'
-          read -a ignore_list <<< "${ignore_string}"
+          read -ra ignore_list <<< "${ignore_string}"
           IFS="$OLDIFS"
         fi
 
-        find '.' -type f \! -path './.git/*' | while read -r FILE; do
+        scan_file()
+        {
+        files_with_issues='0'
+        while read -r FILE; do
           echo '################################################################################'
           FILE_LOWER="$(echo "${FILE}" | tr '[:upper:]' '[:lower:]')"
           to_ignore=false
@@ -88,8 +91,19 @@ runs:
             echo "Ignored: $FILE"
           elif expr "$FILE_LOWER" : '^.*\.\(sh\|bash\|ash\|dash\|ksh\)$' 1>/dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
             echo "Currently scanning: $FILE"
-            "${{ github.action_path }}/shellcheck" "${sc_params[@]}" "$FILE"
+            if test "${{ runner.os }}" = 'Windows'; then
+              "${{ github.action_path }}/shellcheck" "${sc_params[@]}" "$FILE" | tr -d '\r'; STATUS="${PIPESTATUS[0]}"
+            else
+              "${{ github.action_path }}/shellcheck" "${sc_params[@]}" "$FILE"; STATUS="$?"
+            fi
+            if test "${STATUS}" -ne 0; then files_with_issues="$((files_with_issues+1))"; fi
           else
             echo "Skipped: $FILE"
           fi
         done
+        return "${files_with_issues}"
+        }
+        find '.' -type f \! -path './.git/*' | scan_file; files_with_issues="$?"
+
+        echo "Files with issues: ${files_with_issues}"
+        exit "${files_with_issues}"
