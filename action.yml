@@ -78,30 +78,30 @@ runs:
 
         scan_file()
         {
-        files_with_issues='0'
-        while read -r FILE; do
-          echo '################################################################################'
-          FILE_LOWER="$(echo "${FILE}" | tr '[:upper:]' '[:lower:]')"
-          to_ignore=false
-          for ELEM in "${ignore_list[@]}"; do
-            if [[ "${FILE}" == *"/${ELEM}" ]]; then to_ignore=true; break; fi
-          done
+          files_with_issues='0'
+          while read -r FILE; do
+            echo '################################################################################'
+            FILE_LOWER="$(echo "${FILE}" | tr '[:upper:]' '[:lower:]')"
+            to_ignore=false
+            for ELEM in "${ignore_list[@]}"; do
+              if [[ "${FILE}" == *"/${ELEM}" ]]; then to_ignore=true; break; fi
+            done
 
-          if $to_ignore; then
-            echo "Ignored: $FILE"
-          elif expr "$FILE_LOWER" : '^.*\.\(sh\|bash\|ash\|dash\|ksh\)$' 1>/dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
-            echo "Currently scanning: $FILE"
-            if test "${{ runner.os }}" = 'Windows'; then
-              "${{ github.action_path }}/shellcheck" "${sc_params[@]}" "$FILE" | tr -d '\r'; STATUS="${PIPESTATUS[0]}"
+            if $to_ignore; then
+              echo "Ignored: $FILE"
+            elif expr "$FILE_LOWER" : '^.*\.\(sh\|bash\|ash\|dash\|ksh\)$' 1>/dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
+              echo "Currently scanning: $FILE"
+              if test "${{ runner.os }}" = 'Windows'; then
+                "${{ github.action_path }}/shellcheck" "${sc_params[@]}" "$FILE" | tr -d '\r'; STATUS="${PIPESTATUS[0]}"
+              else
+                "${{ github.action_path }}/shellcheck" "${sc_params[@]}" "$FILE"; STATUS="$?"
+              fi
+              if test "${STATUS}" -ne 0; then files_with_issues="$((files_with_issues+1))"; fi
             else
-              "${{ github.action_path }}/shellcheck" "${sc_params[@]}" "$FILE"; STATUS="$?"
+              echo "Skipped: $FILE"
             fi
-            if test "${STATUS}" -ne 0; then files_with_issues="$((files_with_issues+1))"; fi
-          else
-            echo "Skipped: $FILE"
-          fi
-        done
-        return "${files_with_issues}"
+          done
+          return "${files_with_issues}"
         }
         find '.' -type f \! -path './.git/*' | scan_file; files_with_issues="$?"
 
