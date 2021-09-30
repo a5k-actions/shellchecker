@@ -109,8 +109,9 @@ runs:
 
         printf '################################################################################\n\n'
         if test "${files_with_issues}" -gt '0'; then
-          echo "::error::Files with issues: ${files_with_issues}"
+          printf "::error::[ShellChecker] FILES WITH ISSUES: ${files_with_issues} 🐛\n"
         else
-          echo "::notice::Files with issues: ${files_with_issues}"
+          printf "::notice::[ShellChecker] FILES WITH ISSUES: ${files_with_issues} ✅\n"
+          printf "\033[32mAll is good!\n"
         fi
         exit "${files_with_issues}"
