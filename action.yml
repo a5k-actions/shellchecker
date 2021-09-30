@@ -103,7 +103,7 @@ runs:
           done
           return "${files_with_issues}"
         }
-        find '.' -type f \! -path './.git/*' | scan_file; files_with_issues="$?"
+        find '.' -type f \! -path './.git/*' | LC_ALL=C sort | scan_file; files_with_issues="$?"
 
         echo "Files with issues: ${files_with_issues}"
         exit "${files_with_issues}"
