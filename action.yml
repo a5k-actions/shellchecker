@@ -80,6 +80,7 @@ runs:
         scan_files()
         {
           files_with_issues='0'
+          set -o pipefail
           while read -r FILE; do
             echo '################################################################################'
             FILE_LOWER="$(echo "${FILE}" | tr '[:upper:]' '[:lower:]')"
@@ -92,7 +93,6 @@ runs:
               echo "Ignored: $FILE"
             elif expr "$FILE_LOWER" : '^.*\.\(sh\|bash\|ash\|dash\|ksh\)$' 1>/dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
               echo "Currently scanning: $FILE"
-              set -o pipefail
               if test "${{ runner.os }}" = 'Windows'; then
                 "${{ github.action_path }}/shellcheck" "${sc_params[@]}" "$FILE" | tr -d '\r'; STATUS="$?"
               else
