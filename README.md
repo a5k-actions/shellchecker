@@ -1,7 +1,7 @@
 # ShellChecker
 
 [![License: LGPL-3.0-or-later](https://img.shields.io/badge/license-LGPL--3.0-blue)](https://www.gnu.org/licenses/lgpl-3.0.html)
-[![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/a5k-actions/shellchecker?include_prereleases)](https://github.com/a5k-actions/shellchecker/releases/latest)
+[![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/a5k-actions/shellchecker?include_prereleases&sort=semver)](https://github.com/a5k-actions/shellchecker/releases/latest)
 
 <!-- action-docs-description -->
 ## Description
