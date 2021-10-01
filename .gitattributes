@@ -1,0 +1,34 @@
+* text=auto
+
+*.exe           binary
+*.bin           binary
+*.apk           binary
+*.jar           binary
+*.gz            binary
+*.png           binary
+*.jpg           binary
+
+*.gitattributes text eol=lf
+*.gitignore     text eol=lf
+*.gitmodules    text eol=lf
+
+gradlew         text eol=lf
+*.gradle        text eol=lf
+*.properties    text eol=lf
+
+*.yml           text eol=lf
+*.spdx          text eol=lf
+*.xml           text eol=lf
+
+build           text eol=lf
+*.conf          text eol=lf
+*.sh            text eol=lf
+*.ash           text eol=lf
+*.bash          text eol=lf
+*.py            text eol=lf
+
+*.rst           text eol=lf
+*.md            text eol=lf
+
+*.txt           text eol=crlf
+*.bat           text eol=crlf
