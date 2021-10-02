@@ -12,11 +12,11 @@ branding:
 
 inputs:
   shellcheck-version:
-    description: "Version of ShellCheck to use. Values: [stable, latest, v0.7.2, etc.]. Default: [stable]"
+    description: "Version of ShellCheck to use. Values: [stable, latest, v0.7.2, etc.]."
     required: false
     default: "stable"
   severity:
-    description: "Minimum severity of issues to display. Values: [error, warning, info, style]. Default: [style]"
+    description: "Minimum severity of issues to display. Values: [error, warning, info, style]."
     required: false
     default: "style"
   ignore-files:
