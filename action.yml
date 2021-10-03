@@ -5,20 +5,24 @@
 
 name: "ShellChecker"
 author: "ale5000"
-description: "GitHub action to execute a lint check of shell scripts using ShellCheck."
+description: "GitHub action to execute a lint check of all shell scripts using ShellCheck."
 branding:
   icon: "check-circle"
   color: "green"
 
 inputs:
   shellcheck-version:
-    description: "Version of ShellCheck to use. Values: [stable, latest, v0.7.2, etc.]."
+    description: "Version of ShellCheck to use. Values: [stable, latest, v0.7.2, ...]."
     required: false
     default: "stable"
   severity:
-    description: "Minimum severity of issues to display. Values: [error, warning, info, style]."
+    description: "Minimum severity of issues to display. Values: [style, info, warning, error]."
     required: false
     default: "style"
+  enable-all-opt-checks:
+    description: "Enable all optional checks. Values: [true, false]"
+    required: false
+    default: "false"
   ignore-files:
     description: "List of files to ignore, the separator is |"
     required: false
@@ -35,7 +39,7 @@ runs:
       shell: bash
       run: |
         # Downloading ShellCheck...
-        BASE_LINE='38'
+        BASE_LINE='42'
         annotate_error() { LINE="$(("${BASH_LINENO[0]}"+"${BASE_LINE}"-2))"; echo "::error::Error $1 in action.yml at line ${LINE}"; exit "$1"; }
 
         case "${{ runner.os }}" in 'Linux') current_os='linux';; 'macOS') current_os='darwin';; 'Windows') current_os='win';; *) annotate_error 1; esac
@@ -61,13 +65,14 @@ runs:
         # Displaying ShellCheck version...
         "${{ github.action_path }}/shellcheck" --version
     - name: "Execute ShellCheck scan"
+      id: 'shellcheck-scan'
       shell: bash {0}
       run: |
         # Executing ShellCheck scan...
-        sc_params=()
-        sc_params+=("--color")
-        sc_params+=("-S"); sc_params+=("${{ inputs.severity }}")
-        if test "${{ github.event_name }}" != 'pull_request'; then sc_params+=("-x"); fi
+        SHELLCHECK_OPTS="--color --severity=${{ inputs.severity }}"
+        if test "${{ inputs.enable-all-opt-checks }}" != 'false'; then SHELLCHECK_OPTS+=" --enable=all"; fi
+        if test "${{ github.event_name }}" != 'pull_request'; then SHELLCHECK_OPTS+=" -x"; fi
+        export SHELLCHECK_OPTS
 
         ignore_string="${{ inputs.ignore-files }}"
         ignore_list=()
@@ -80,7 +85,8 @@ runs:
 
         scan_files()
         {
-          files_with_issues='0'
+          count='0'
+          list=()
           escaped_csi="$(printf '\033\[')"
           set -o pipefail
           while read -r FILE; do
@@ -96,24 +102,27 @@ runs:
             elif expr "$FILE_LOWER" : '^.*\.\(sh\|bash\|ash\|dash\|ksh\)$' 1>/dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
               echo "Currently scanning: $FILE"
               if test "${{ runner.os }}" = 'Windows'; then
-                "${{ github.action_path }}/shellcheck" "${sc_params[@]}" "$FILE" | tr -d '\r' | sed -e "s/^\(${escaped_csi}[02-9][0-9]\?m\)/\t\1/"; STATUS="$?"
+                "${{ github.action_path }}/shellcheck" "$FILE" | tr -d '\r' | sed -e "s/^\(${escaped_csi}[02-9][0-9]\?m\)/\t\1/"; STATUS="$?"
               else
-                "${{ github.action_path }}/shellcheck" "${sc_params[@]}" "$FILE" | sed -e "s/^\(${escaped_csi}[02-9][0-9]\?m\)/\t\1/"; STATUS="$?"
+                "${{ github.action_path }}/shellcheck" "$FILE" | sed -e "s/^\(${escaped_csi}[02-9][0-9]\?m\)/\t\1/"; STATUS="$?"
               fi
-              if test "${STATUS}" -ne 0; then files_with_issues="$((files_with_issues+1))"; fi
+              if test "${STATUS}" -ne 0; then count="$((count+1))"; list+=("$FILE"); fi
             else
               echo "Skipped: $FILE"
             fi
           done
-          return "${files_with_issues}"
+
+          echo "::set-output name=numfileswithissues::${count}"
+          echo "::set-output name=listfileswithissues::${list[@]}"; unset list
+          return "${count}"
         }
-        find '.' -type f \! -path './.git/*' | LC_ALL=C sort | scan_files; files_with_issues="$?"
+        find '.' -type f \! -path './.git/*' | LC_ALL=C sort | scan_files; num_files_with_issues="$?"
 
         printf '################################################################################\n\n'
-        if test "${files_with_issues}" -gt '0'; then
-          printf "::error::[ShellChecker] FILES WITH ISSUES: ${files_with_issues} 🐛\n"
+        if test "${num_files_with_issues}" -gt '0'; then
+          echo "::error::[ShellChecker] NUMBER OF FILES WITH ISSUES: ${num_files_with_issues} 🐛"
         else
-          printf "::notice::[ShellChecker] FILES WITH ISSUES: ${files_with_issues} ✅\n"
+          echo "::notice::[ShellChecker] NUMBER OF FILES WITH ISSUES: 0 ✅"
           printf "\033[32mAll is good!\n"
         fi
-        exit "${files_with_issues}"
+        exit '1'
