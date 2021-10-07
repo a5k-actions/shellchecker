@@ -26,6 +26,13 @@ inputs:
   ignore-files:
     description: "List of files to ignore, the separator is: |"
     required: false
+outputs:
+  NumFilesWthIssues:
+    description: "Number of files with issues"
+    value: "${{ steps.shellcheck-scan.outputs.numfileswithissues }}"
+  ListFilesWithIssues:
+    description: "A list of files with issues"
+    value: "${{ steps.shellcheck-scan.outputs.listfileswithissues }}"
 runs:
   using: "composite"
   steps:
@@ -39,7 +46,7 @@ runs:
       shell: bash
       run: |
         # Downloading ShellCheck...
-        BASE_LINE='42'
+        BASE_LINE='49'
         annotate_error() { LINE="$(("${BASH_LINENO[0]}"+"${BASE_LINE}"-2))"; echo "::error::Error $1 in action.yml at line ${LINE}"; exit "$1"; }
 
         case "${{ runner.os }}" in 'Linux') current_os='linux';; 'macOS') current_os='darwin';; 'Windows') current_os='win';; *) annotate_error 1; esac
