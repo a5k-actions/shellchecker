@@ -12,11 +12,11 @@ branding:
 
 inputs:
   shellcheck-version:
-    description: "Version of ShellCheck to use. Values: [stable, latest, v0.7.2, ...]."
+    description: "Version of ShellCheck to use. Values: [stable, latest, v0.7.2, ...]"
     required: false
     default: "stable"
   severity:
-    description: "Minimum severity of issues to display. Values: [style, info, warning, error]."
+    description: "Minimum severity of issues to display. Values: [style, info, warning, error]"
     required: false
     default: "style"
   enable-all-opt-checks:
@@ -24,7 +24,7 @@ inputs:
     required: false
     default: "false"
   ignore-files:
-    description: "List of files to ignore, the separator is |"
+    description: "List of files to ignore, the separator is: |"
     required: false
 runs:
   using: "composite"
@@ -51,14 +51,20 @@ runs:
         ## Installing wget (only on Windows)...
         if test "${current_os}" = 'win'; then choco install --no-progress --yes wget 1>/dev/null || annotate_error 2; fi
 
-        wget -q -O "${archive_name?}" "${base_url?}${archive_name?}" || annotate_error 3
+        download_dir="${action_path?}/our_downloads"
+        mkdir -p "${download_dir?}" || annotate_error 3
+        cd "${download_dir?}" || annotate_error 4
+        wget -q -O "${archive_name?}" "${base_url?}${archive_name?}" || annotate_error 5
+
+        archive_name="${download_dir?}/${archive_name?}"
         if test "${current_os}" = 'win'; then
-          unzip -ojq "${archive_name?}" '*' -d "./shellcheck-${sc_ver?}/" || annotate_error 4
+          unzip -ojq "${archive_name?}" '*' -d "${download_dir?}/shellcheck-${sc_ver?}/" || annotate_error 6
         else
-          tar -xf "${archive_name?}" || annotate_error 4
+          tar -xf "${archive_name?}" || annotate_error 6
         fi
-        mv -f "./shellcheck-${sc_ver?}/shellcheck"* "${action_path?}/" || annotate_error 5
-        rm -f "./${archive_name?}"; rm -rf "./shellcheck-${sc_ver?}"
+        mv -f "${download_dir?}/shellcheck-${sc_ver?}/shellcheck"* "${action_path?}/" || annotate_error 7
+        cd "${action_path?}" || annotate_error 8
+        rm -rf "${download_dir?}" || annotate_error 9
     - name: "Execute ShellCheck scan"
       id: 'shellcheck-scan'
       shell: bash {0}
@@ -109,9 +115,10 @@ runs:
               echo "Skipped: $FILE"
             fi
           done
+          list_string="$(printf '\"%s\" ' "${list[@]}")"; unset list
 
           echo "::set-output name=numfileswithissues::${count}"
-          echo "::set-output name=listfileswithissues::${list[@]}"; unset list
+          echo "::set-output name=listfileswithissues::(${list_string})"; unset list_string
           return "${count}"
         }
         find '.' -type f \! -path './.git/*' | LC_ALL=C sort | scan_files; num_files_with_issues="$?"
