@@ -59,16 +59,14 @@ runs:
         fi
         mv -f "./shellcheck-${sc_ver?}/shellcheck"* "${action_path?}/" || annotate_error 5
         rm -f "./${archive_name?}"; rm -rf "./shellcheck-${sc_ver?}"
-    - name: "Display ShellCheck version"
-      shell: bash
-      run: |
-        # Displaying ShellCheck version...
-        "${{ github.action_path }}/shellcheck" --version
     - name: "Execute ShellCheck scan"
       id: 'shellcheck-scan'
       shell: bash {0}
       run: |
         # Executing ShellCheck scan...
+        PATH="${{ github.action_path }}:${PATH}"
+        hash shellcheck
+        shellcheck --version
         SHELLCHECK_OPTS="--color --severity=${{ inputs.severity }}"
         if test "${{ inputs.enable-all-opt-checks }}" != 'false'; then SHELLCHECK_OPTS+=" --enable=all"; fi
         if test "${{ github.event_name }}" != 'pull_request'; then SHELLCHECK_OPTS+=" -x"; fi
@@ -102,9 +100,9 @@ runs:
             elif expr "$FILE_LOWER" : '^.*\.\(sh\|bash\|ash\|dash\|ksh\)$' 1>/dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
               echo "Currently scanning: $FILE"
               if test "${{ runner.os }}" = 'Windows'; then
-                "${{ github.action_path }}/shellcheck" "$FILE" | tr -d '\r' | sed -e "s/^\(${escaped_csi}[02-9][0-9]\?m\)/\t\1/"; STATUS="$?"
+                shellcheck "$FILE" | tr -d '\r' | sed -e "s/^\(${escaped_csi}[02-9][0-9]\?m\)/\t\1/"; STATUS="$?"
               else
-                "${{ github.action_path }}/shellcheck" "$FILE" | sed -e "s/^\(${escaped_csi}[02-9][0-9]\?m\)/\t\1/"; STATUS="$?"
+                shellcheck "$FILE" | sed -e "s/^\(${escaped_csi}[02-9][0-9]\?m\)/\t\1/"; STATUS="$?"
               fi
               if test "${STATUS}" -ne 0; then count="$((count+1))"; list+=("$FILE"); fi
             else
