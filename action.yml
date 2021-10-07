@@ -73,7 +73,7 @@ runs:
         cd "${action_path?}" || annotate_error 8
         rm -rf "${download_dir?}" || annotate_error 9
     - name: "Execute ShellCheck scan"
-      id: 'shellcheck-scan'
+      id: "shellcheck-scan"
       shell: bash {0}
       run: |
         # Executing ShellCheck scan...
