@@ -49,7 +49,7 @@ runs:
       shell: bash
       run: |
         # Downloading ShellCheck...
-        BASE_LINE='49'
+        BASE_LINE='52'
         annotate_error() { LINE="$(("${BASH_LINENO[0]}"+"${BASE_LINE}"-2))"; echo "::error::Error $1 in action.yml at line ${LINE}"; exit "$1"; }
 
         case "${{ runner.os }}" in 'Linux') current_os='linux';; 'macOS') current_os='darwin';; 'Windows') current_os='win';; *) annotate_error 1; esac
