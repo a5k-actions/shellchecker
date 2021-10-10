@@ -10,6 +10,7 @@ GitHub action to execute a lint check of all shell scripts using ShellCheck.
 
 
 <!-- action-docs-description -->
+It works under Ubuntu, macOS and Windows runners.
 
 ## Usage example
 
