@@ -77,7 +77,7 @@ runs:
         rm -rf "${download_dir?}" || annotate_error 9
     - name: "Execute ShellCheck scan"
       id: "shellcheck-scan"
-      shell: bash {0}
+      shell: bash
       run: |
         # Executing ShellCheck scan...
         PATH="${{ github.action_path }}:${PATH}"
@@ -118,10 +118,11 @@ runs:
               echo "Ignored: $FILE"
             elif expr "$FILE_LOWER" : '^.*\.\(sh\|ash\|dash\|ksh\|bash\|bats\)$' 1>/dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
               echo "Currently scanning: $FILE"
+              STATUS=0
               if test "${{ runner.os }}" = 'Windows'; then
-                shellcheck "$FILE" | tr -d '\r' | sed -e "${regexp_1}" | sed -e "${regexp_2}"; STATUS="$?"
+                shellcheck "$FILE" | tr -d '\r' | sed -e "${regexp_1}" | sed -e "${regexp_2}" || STATUS="$?"
               else
-                shellcheck "$FILE" | sed -e "${regexp_1}" | sed -e "${regexp_2}"; STATUS="$?"
+                shellcheck "$FILE" | sed -e "${regexp_1}" | sed -e "${regexp_2}" || STATUS="$?"
               fi
               if test "${STATUS}" -ne 0; then count="$((count+1))"; list+=("$FILE"); fi
             else
@@ -134,7 +135,8 @@ runs:
           echo "::set-output name=listfileswithissues::(${list_string})"; unset list_string
           return "${count}"
         }
-        find '.' -type f \! -path './.git/*' | LC_ALL=C sort | scan_files; num_files_with_issues="$?"
+        num_files_with_issues=0
+        find '.' -type f \! -path './.git/*' | LC_ALL=C sort | scan_files || num_files_with_issues="$?"
 
         printf '################################################################################\n\n'
         if test "${num_files_with_issues}" -gt 0; then
