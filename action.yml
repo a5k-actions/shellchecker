@@ -41,16 +41,16 @@ runs:
       run: |
         # Setting up matchers...
         action_path="${{ github.action_path }}"
-        matcher_file="${action_path?}/.github/matchers/tty/shellcheck-matcher.json"
-        if test -f "${matcher_file?}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher 1 configured.'; fi
         matcher_file="${action_path?}/.github/matchers/tty/shellcheck-matcher-legacy.json"
+        if test -f "${matcher_file?}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher 1 configured.'; fi
+        matcher_file="${action_path?}/.github/matchers/tty/shellcheck-matcher.json"
         if test -f "${matcher_file?}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher 2 configured.'; fi
     - name: "Download ShellCheck"
       shell: bash
       run: |
         # Downloading ShellCheck...
         BASE_LINE='52'
-        annotate_error() { LINE="$(("${BASH_LINENO[0]}"+"${BASE_LINE}"-2))"; echo "::error::Error $1 in action.yml at line ${LINE}"; exit "$1"; }
+        annotate_error() { LINE="$(("${BASH_LINENO[0]}"+"${BASE_LINE}"-2))"; echo "::error::Error $1 in action.yml at line ${LINE}" 1>&2; exit "$1"; }
 
         case "${{ runner.os }}" in 'Linux') current_os='linux';; 'macOS') current_os='darwin';; 'Windows') current_os='win';; *) annotate_error 1; esac
         action_path="${{ github.action_path }}"
@@ -59,7 +59,7 @@ runs:
         if test "${current_os}" = 'win'; then archive_name="shellcheck-${sc_ver?}.zip"; else archive_name="shellcheck-${sc_ver?}.${current_os?}.x86_64.tar.xz"; fi
 
         ## Installing wget (only on Windows)...
-        if test "${current_os}" = 'win'; then choco install --no-progress --yes wget 1>/dev/null || annotate_error 2; fi
+        if test "${current_os}" = 'win'; then choco install --no-progress --yes wget 1>&- || annotate_error 2; fi
 
         download_dir="${action_path?}/our_downloads"
         mkdir -p "${download_dir?}" || annotate_error 3
@@ -137,10 +137,10 @@ runs:
         find '.' -type f \! -path './.git/*' | LC_ALL=C sort | scan_files; num_files_with_issues="$?"
 
         printf '################################################################################\n\n'
-        if test "${num_files_with_issues}" -gt '0'; then
-          echo "::error::[ShellChecker] NUMBER OF FILES WITH ISSUES: ${num_files_with_issues} 🐛"
-          exit '1'
+        if test "${num_files_with_issues}" -gt 0; then
+          echo "::error::[ShellChecker] NUMBER OF FILES WITH ISSUES: ${num_files_with_issues} 🐛" 1>&2
+          exit 1
         else
-          echo "::notice::[ShellChecker] NUMBER OF FILES WITH ISSUES: 0 ✅"
+          printf "\033[32m[ShellChecker] NUMBER OF FILES WITH ISSUES: 0 ✅\n"
           printf "\033[32mAll is good!\n"
         fi
