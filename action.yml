@@ -102,6 +102,9 @@ runs:
           count='0'
           list=()
           escaped_csi="$(printf '\033\[')"
+          regexp_1="s/^\(${escaped_csi}0m\)/\t\t\1/"
+          regexp_2="s/^\(${escaped_csi}[2-9][0-9]\?m\)/\t\1/"
+
           set -o pipefail
           while read -r FILE; do
             echo '################################################################################'
@@ -116,9 +119,9 @@ runs:
             elif expr "$FILE_LOWER" : '^.*\.\(sh\|ash\|dash\|ksh\|bash\|bats\)$' 1>/dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
               echo "Currently scanning: $FILE"
               if test "${{ runner.os }}" = 'Windows'; then
-                shellcheck "$FILE" | tr -d '\r' | sed -e "s/^\(${escaped_csi}[02-9][0-9]\?m\)/\t\1/"; STATUS="$?"
+                shellcheck "$FILE" | tr -d '\r' | sed -e "${regexp_1}" | sed -e "${regexp_2}"; STATUS="$?"
               else
-                shellcheck "$FILE" | sed -e "s/^\(${escaped_csi}[02-9][0-9]\?m\)/\t\1/"; STATUS="$?"
+                shellcheck "$FILE" | sed -e "${regexp_1}" | sed -e "${regexp_2}"; STATUS="$?"
               fi
               if test "${STATUS}" -ne 0; then count="$((count+1))"; list+=("$FILE"); fi
             else
