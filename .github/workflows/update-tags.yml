@@ -1,0 +1,25 @@
+---
+name: "Update tags"
+
+on:
+  push:
+    tags:
+      - v[0-9]+.[0-9]+.[0-9]+
+
+jobs:
+  tags-updater:
+    name: "Update tags"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: "Update tags"
+        uses: bewuethr/release-tracker-action@v1
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        with:
+          update-latest: true
+          update-minor: false
