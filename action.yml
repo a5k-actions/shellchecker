@@ -41,10 +41,10 @@ runs:
       run: |
         # Setting up matchers...
         action_path="${{ github.action_path }}"
-        matcher_file="${action_path?}/.github/matchers/tty/shellcheck-matcher-legacy.json"
-        if test -f "${matcher_file?}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher 1 configured.'; fi
-        matcher_file="${action_path?}/.github/matchers/tty/shellcheck-matcher.json"
-        if test -f "${matcher_file?}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher 2 configured.'; fi
+        matcher_file="${action_path:?}/.github/matchers/tty/shellcheck-matcher-legacy.json"
+        if test -f "${matcher_file:?}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher 1 configured.'; fi
+        matcher_file="${action_path:?}/.github/matchers/tty/shellcheck-matcher.json"
+        if test -f "${matcher_file:?}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher 2 configured.'; fi
     - name: "Download ShellCheck"
       shell: bash
       run: |
@@ -55,26 +55,26 @@ runs:
         case "${{ runner.os }}" in 'Linux') current_os='linux';; 'macOS') current_os='darwin';; 'Windows') current_os='win';; *) annotate_error 1; esac
         action_path="${{ github.action_path }}"
         sc_ver="${{ inputs.shellcheck-version }}"
-        base_url="https://github.com/koalaman/shellcheck/releases/download/${sc_ver?}/"
-        if test "${current_os}" = 'win'; then archive_name="shellcheck-${sc_ver?}.zip"; else archive_name="shellcheck-${sc_ver?}.${current_os?}.x86_64.tar.xz"; fi
+        base_url="https://github.com/koalaman/shellcheck/releases/download/${sc_ver:?}/"
+        if test "${current_os}" = 'win'; then archive_name="shellcheck-${sc_ver:?}.zip"; else archive_name="shellcheck-${sc_ver:?}.${current_os:?}.x86_64.tar.xz"; fi
 
         ## Installing wget (only on Windows)...
         if test "${current_os}" = 'win'; then choco install --no-progress --yes wget 1>&- || annotate_error 2; fi
 
-        download_dir="${action_path?}/our_downloads"
-        mkdir -p "${download_dir?}" || annotate_error 3
-        cd "${download_dir?}" || annotate_error 4
-        wget -q -O "${archive_name?}" "${base_url?}${archive_name?}" || annotate_error 5
+        download_dir="${action_path:?}/our_downloads"
+        mkdir -p "${download_dir:?}" || annotate_error 3
+        cd "${download_dir:?}" || annotate_error 4
+        wget -q -O "${archive_name:?}" "${base_url:?}${archive_name:?}" || annotate_error 5
 
-        archive_name="${download_dir?}/${archive_name?}"
+        archive_name="${download_dir:?}/${archive_name:?}"
         if test "${current_os}" = 'win'; then
-          unzip -ojq "${archive_name?}" '*' -d "${download_dir?}/shellcheck-${sc_ver?}/" || annotate_error 6
+          unzip -ojq "${archive_name:?}" '*' -d "${download_dir:?}/shellcheck-${sc_ver:?}/" || annotate_error 6
         else
-          tar -xf "${archive_name?}" || annotate_error 6
+          tar -xf "${archive_name:?}" || annotate_error 6
         fi
-        mv -f "${download_dir?}/shellcheck-${sc_ver?}/shellcheck"* "${action_path?}/" || annotate_error 7
-        cd "${action_path?}" || annotate_error 8
-        rm -rf "${download_dir?}" || annotate_error 9
+        mv -f "${download_dir:?}/shellcheck-${sc_ver:?}/shellcheck"* "${action_path:?}/" || annotate_error 7
+        cd "${action_path:?}" || annotate_error 8
+        rm -rf "${download_dir:?}" || annotate_error 9
     - name: "Execute ShellCheck scan"
       id: "shellcheck-scan"
       shell: bash
