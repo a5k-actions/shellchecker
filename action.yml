@@ -12,7 +12,7 @@ branding:
 
 inputs:
   shellcheck-version:
-    description: "Version of ShellCheck to use. Values: [stable, latest, v0.7.2, ...]"
+    description: "Version of ShellCheck to use. Values: [stable, latest, v0.8.0, ...]"
     required: false
     default: "stable"
   severity:
@@ -83,8 +83,10 @@ runs:
         PATH="${{ github.action_path }}:${PATH}"
         hash shellcheck
         shellcheck --version
-        SHELLCHECK_OPTS="--color --severity=${{ inputs.severity }}"
-        if test "${{ inputs.enable-all-opt-checks }}" != 'false'; then SHELLCHECK_OPTS+=" --enable=all"; fi
+        SHELLCHECK_OPTS="-C -S${{ inputs.severity }}"
+        if test "${{ inputs.enable-all-opt-checks }}" != 'false'; then
+          SHELLCHECK_OPTS+=" -oall"
+        fi
         if test "${{ github.event_name }}" = 'pull_request'; then
           SHELLCHECK_OPTS+=" -e1091"
         else
