@@ -86,9 +86,9 @@ runs:
         SHELLCHECK_OPTS="--color --severity=${{ inputs.severity }}"
         if test "${{ inputs.enable-all-opt-checks }}" != 'false'; then SHELLCHECK_OPTS+=" --enable=all"; fi
         if test "${{ github.event_name }}" = 'pull_request'; then
-          SHELLCHECK_OPTS+=" -e1091";
+          SHELLCHECK_OPTS+=" -e1091"
         else
-          SHELLCHECK_OPTS+=" -x";
+          SHELLCHECK_OPTS+=" -x"
         fi
         export SHELLCHECK_OPTS
 
