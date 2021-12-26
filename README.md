@@ -1,3 +1,9 @@
+<!--
+  SPDX-FileCopyrightText: Copyright (C) 2021 ale5000
+  SPDX-License-Identifier: LGPL-3.0-or-later
+  SPDX-FileType: DOCUMENTATION
+-->
+
 # ShellChecker
 
 [![License: LGPL-3.0-or-later](https://img.shields.io/badge/license-LGPL--3.0%2B-blue)](https://www.gnu.org/licenses/lgpl-3.0.html)
