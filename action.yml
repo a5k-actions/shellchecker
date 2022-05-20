@@ -18,7 +18,6 @@ inputs:
   severity:
     description: "Minimum severity of issues to display. Values: [style, info, warning, error]"
     required: false
-    default: "style"
   enable-all-opt-checks:
     description: "Enable all optional checks. Values: [true, false]"
     required: false
@@ -80,23 +79,26 @@ runs:
       shell: bash
       run: |
         # Executing ShellCheck scan...
-        PATH="${{ github.action_path }}:${PATH}"
+        PATH="${{ github.action_path }}:${PATH:?}"
         hash shellcheck
         shellcheck --version
-        SHELLCHECK_OPTS="-C -S${{ inputs.severity }}"
-        if test "${{ inputs.enable-all-opt-checks }}" != 'false'; then
-          SHELLCHECK_OPTS+=" -oall"
+        SHELLCHECK_OPTS='-C'
+        if test -n '${{ inputs.severity }}'; then
+          SHELLCHECK_OPTS+=' -S${{ inputs.severity }}'
         fi
-        if test "${{ github.event_name }}" = 'pull_request'; then
-          SHELLCHECK_OPTS+=" -e1091"
+        if test '${{ inputs.enable-all-opt-checks }}' != 'false'; then
+          SHELLCHECK_OPTS+=' -oall'
+        fi
+        if test '${{ github.event_name }}' = 'pull_request'; then
+          SHELLCHECK_OPTS+=' -e1091'
         else
-          SHELLCHECK_OPTS+=" -x"
+          SHELLCHECK_OPTS+=' -x'
         fi
         export SHELLCHECK_OPTS
 
-        ignore_string="${{ inputs.ignore-files }}"
+        ignore_string='${{ inputs.ignore-files }}'
         ignore_list=()
-        if test -n "$ignore_string"; then
+        if test -n "${ignore_string}"; then
           OLDIFS="$IFS"
           IFS='|'
           read -ra ignore_list <<< "${ignore_string}"
