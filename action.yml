@@ -82,17 +82,18 @@ runs:
         PATH="${{ github.action_path }}:${PATH:?}"
         hash shellcheck
         shellcheck --version
+
         SHELLCHECK_OPTS='-C'
         if test -n '${{ inputs.severity }}'; then
           SHELLCHECK_OPTS+=' -S${{ inputs.severity }}'
         fi
-        if test '${{ inputs.enable-all-opt-checks }}' != 'false'; then
-          SHELLCHECK_OPTS+=' -oall'
-        fi
         if test '${{ github.event_name }}' = 'pull_request'; then
-          SHELLCHECK_OPTS+=' -e1091'
+          SHELLCHECK_OPTS+=' --norc -e1091'
         else
           SHELLCHECK_OPTS+=' -x'
+          if test '${{ inputs.enable-all-opt-checks }}' != 'false'; then
+            SHELLCHECK_OPTS+=' -oall'
+          fi
         fi
         export SHELLCHECK_OPTS
 
