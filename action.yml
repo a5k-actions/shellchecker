@@ -148,10 +148,10 @@ runs:
         find '.' -type f \! -path './.git/*' | LC_ALL=C sort | scan_files || num_files_with_issues="$?"
 
         printf '################################################################################\n\n'
-        if test "${num_files_with_issues}" -gt 0; then
-          echo "::notice::[ShellChecker] NUMBER OF FILES WITH ISSUES: ${num_files_with_issues} 🐛"
+        if test "${num_files_with_issues:?}" -gt 0; then
+          printf '::notice::%s\n' "[ShellChecker] NUMBER OF FILES WITH ISSUES: ${num_files_with_issues:?} 🐛"
           exit 1
         else
-          printf "\033[32m[ShellChecker] NUMBER OF FILES WITH ISSUES: 0 ✅\n"
-          printf "\033[32mAll is good!\n"
+          printf '\033[32m%s\033[0m\n' '[ShellChecker] NUMBER OF FILES WITH ISSUES: 0 ✅'
+          printf '\033[32m%s\033[0m\n' 'All is good!'
         fi
