@@ -140,8 +140,8 @@ runs:
           done
           list_string="$(printf '\"%s\" ' "${list[@]}")"; unset list
 
-          echo "::set-output name=numfileswithissues::${count}"
-          echo "::set-output name=listfileswithissues::(${list_string})"; unset list_string
+          printf 'numfileswithissues=%s\n' "${count:?}" >> "${GITHUB_OUTPUT:?}"
+          printf 'listfileswithissues=%s\n' "(${list_string?})" >> "${GITHUB_OUTPUT:?}"; unset list_string
           return "${count}"
         }
         num_files_with_issues=0
