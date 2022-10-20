@@ -25,6 +25,7 @@ inputs:
   ignore-files:
     description: "List of files to ignore, the separator is: |"
     required: false
+    default: "gradlew"
 outputs:
   NumFilesWthIssues:
     description: "Number of files with issues"
