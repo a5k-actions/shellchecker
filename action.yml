@@ -41,17 +41,28 @@ runs:
         # Setting up matchers...
         action_path="${{ github.action_path }}"
         matcher_file="${action_path:?}/.github/matchers/tty/shellcheck-matcher-legacy.json"
-        if test -f "${matcher_file:?}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher 1 configured.'; fi
+        if test -f "${matcher_file:?}"; then
+          echo "::add-matcher::${matcher_file}"
+          echo 'Matcher 1 configured.'
+        fi
         matcher_file="${action_path:?}/.github/matchers/tty/shellcheck-matcher.json"
-        if test -f "${matcher_file:?}"; then echo "::add-matcher::${matcher_file}"; echo 'Matcher 2 configured.'; fi
+        if test -f "${matcher_file:?}"; then
+          echo "::add-matcher::${matcher_file}"
+          echo 'Matcher 2 configured.'
+        fi
     - name: "Download ShellCheck"
       shell: bash
       run: |
         # Downloading ShellCheck...
-        BASE_LINE='51'
-        annotate_error() { LINE="$(("${BASH_LINENO[0]}"+"${BASE_LINE}"-2))"; echo "::error::Error $1 in action.yml at line ${LINE}" 1>&2; exit "$1"; }
+        BASE_LINE='57'
+        annotate_error()
+        {
+          LINE="$(("${BASH_LINENO[0]}" + "${BASE_LINE}" - 2))"
+          echo 1>&2 "::error::Error ${1} in action.yml at line ${LINE}"
+          exit "${1}"
+        }
 
-        case "${{ runner.os }}" in 'Linux') current_os='linux';; 'macOS') current_os='darwin';; 'Windows') current_os='win';; *) annotate_error 1; esac
+        case "${{ runner.os }}" in 'Linux') current_os='linux' ;; 'macOS') current_os='darwin' ;; 'Windows') current_os='win' ;; *) annotate_error 1 ;; esac
         action_path="${{ github.action_path }}"
         sc_ver="${{ inputs.shellcheck-version }}"
         base_url="https://github.com/koalaman/shellcheck/releases/download/${sc_ver:?}/"
@@ -120,12 +131,15 @@ runs:
             FILE_LOWER="$(echo "${FILE}" | tr '[:upper:]' '[:lower:]')"
             to_ignore=false
             for ELEM in "${ignore_list[@]}"; do
-              if [[ "${FILE}" == *"/${ELEM}" ]]; then to_ignore=true; break; fi
+              if [[ "${FILE}" == *"/${ELEM}" ]]; then
+                to_ignore=true
+                break
+              fi
             done
 
             if $to_ignore; then
               echo "Ignored: $FILE"
-            elif expr "$FILE_LOWER" : '^.*\.\(sh\|ash\|dash\|ksh\|bash\|bats\)$' 1>/dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
+            elif expr "$FILE_LOWER" : '^.*\.\(sh\|ash\|dash\|ksh\|bash\|bats\)$' 1> /dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
               echo "Currently scanning: $FILE"
               STATUS=0
               if test "${{ runner.os }}" = 'Windows'; then
@@ -133,15 +147,20 @@ runs:
               else
                 shellcheck "$FILE" | sed -e "${regexp_1}" | sed -e "${regexp_2}" || STATUS="$?"
               fi
-              if test "${STATUS}" -ne 0; then count="$((count+1))"; list+=("$FILE"); fi
+              if test "${STATUS}" -ne 0; then
+                count="$((count + 1))"
+                list+=("$FILE")
+              fi
             else
               echo "Skipped: $FILE"
             fi
           done
-          list_string="$(printf '\"%s\" ' "${list[@]}")"; unset list
+          list_string="$(printf '\"%s\" ' "${list[@]}")"
+          unset list
 
           printf 'numfileswithissues=%s\n' "${count:?}" >> "${GITHUB_OUTPUT:?}"
-          printf 'listfileswithissues=%s\n' "(${list_string?})" >> "${GITHUB_OUTPUT:?}"; unset list_string
+          printf 'listfileswithissues=%s\n' "(${list_string?})" >> "${GITHUB_OUTPUT:?}"
+          unset list_string
           return "${count}"
         }
         num_files_with_issues=0
