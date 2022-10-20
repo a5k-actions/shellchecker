@@ -25,19 +25,19 @@ It works under Ubuntu, macOS and Windows runners.
 
 ```yaml
 ---
-name: 'Code linting'
+name: "Code linting"
 
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
   shellchecker:
-    name: 'ShellChecker'
+    name: "ShellChecker"
     runs-on: ubuntu-latest
 
     steps:
-      - name: 'Checkout code'
+      - name: "Checkout code"
         uses: actions/checkout@v2
-      - name: 'ShellChecker'
+      - name: "ShellChecker"
         uses: a5k-actions/shellchecker@main
 ```
 
