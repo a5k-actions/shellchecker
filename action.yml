@@ -55,7 +55,7 @@ runs:
       shell: bash
       run: |
         # Downloading ShellCheck...
-        BASE_LINE='57'
+        BASE_LINE='58'
         annotate_error()
         {
           LINE="$(("${BASH_LINENO[0]}" + "${BASE_LINE}" - 2))"
