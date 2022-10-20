@@ -38,7 +38,7 @@ jobs:
       - name: "Checkout code"
         uses: actions/checkout@v3
       - name: "ShellChecker"
-        uses: a5k-actions/shellchecker@main
+        uses: a5k-actions/shellchecker@v0
 ```
 
 <!-- action-docs-inputs -->
