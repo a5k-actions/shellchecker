@@ -59,7 +59,7 @@ runs:
         annotate_error()
         {
           LINE="$(("${BASH_LINENO[0]}" + "${BASE_LINE}" - 2))"
-          echo 1>&2 "::error::Error ${1} in action.yml at line ${LINE}"
+          echo 1>&2 "::error::[ShellChecker] Error ${1} in action.yml at line ${LINE}"
           exit "${1}"
         }
 
