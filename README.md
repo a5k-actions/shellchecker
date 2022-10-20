@@ -50,7 +50,7 @@ jobs:
 | shellcheck-version    | Version of ShellCheck to use. Values: [stable, latest, v0.8.0, ...]          | `false`  | stable  |
 | severity              | Minimum severity of issues to display. Values: [style, info, warning, error] | `false`  |         |
 | enable-all-opt-checks | Enable all optional checks. Values: [true, false]                            | `false`  | false   |
-| ignore-files          | List of files to ignore, the separator is: &#124;                            | `false`  |         |
+| ignore-files          | List of files to ignore, the separator is: &#124;                            | `false`  | gradlew |
 
 <!-- action-docs-inputs -->
 
