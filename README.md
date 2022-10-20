@@ -33,9 +33,10 @@ jobs:
   shellchecker:
     name: "ShellChecker"
     runs-on: ubuntu-latest
+    permissions: {}
 
     steps:
-      - name: "Checkout code"
+      - name: "Check out code"
         uses: actions/checkout@v3
       - name: "ShellChecker"
         uses: a5k-actions/shellchecker@v0
