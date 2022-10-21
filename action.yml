@@ -140,7 +140,7 @@ runs:
 
             if $to_ignore; then
               echo "Ignored: $FILE"
-            elif expr "$FILE_LOWER" : '^.*\.\(sh\|ash\|dash\|ksh\|bash\|bats\)$' 1> /dev/null || test '#!' = "$(head -c 2 "$FILE")"; then
+            elif expr "$FILE_LOWER" : '^.*\.\(sh\|ash\|dash\|ksh\|bash\|bats\)$' 1> /dev/null || test '#!' = "$(head -qc 2 -- "${FILE:?}")"; then
               echo "Currently scanning: $FILE"
               STATUS=0
               if test "${{ runner.os }}" = 'Windows'; then
