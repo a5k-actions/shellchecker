@@ -91,6 +91,10 @@ runs:
       shell: bash
       run: |
         # Executing ShellCheck scan...
+        set -e
+        # shellcheck disable=SC3040
+        set -o pipefail || true
+
         PATH="${{ github.action_path }}:${PATH:?}"
         hash shellcheck
         shellcheck --version
@@ -118,6 +122,12 @@ runs:
           IFS="$OLDIFS"
         fi
 
+        is_shell_script()
+        {
+          test '#!' = "$(head -qc 2 -- "${1:?}")" || return "${?}"
+          head -qn 1 -- "${1:?}" | grep -qm 1 -e '[ak]sh$' -- || return "${?}"
+        }
+
         scan_files()
         {
           count='0'
@@ -126,7 +136,6 @@ runs:
           regexp_1="s/^\(${escaped_csi}0m\)/\t\t\1/"
           regexp_2="s/^\(${escaped_csi}[2-9][0-9]\?m\)/ \t\1/"
 
-          set -o pipefail
           while read -r FILE; do
             echo '################################################################################'
             FILE_LOWER="$(echo "${FILE}" | tr '[:upper:]' '[:lower:]')"
@@ -140,7 +149,7 @@ runs:
 
             if $to_ignore; then
               echo "Ignored: $FILE"
-            elif expr "$FILE_LOWER" : '^.*\.\(sh\|ash\|dash\|ksh\|bash\|bats\)$' 1> /dev/null || test '#!' = "$(head -qc 2 -- "${FILE:?}")"; then
+            elif expr "$FILE_LOWER" : '^.*\.\(sh\|ash\|dash\|ksh\|bash\|bats\)$' 1> /dev/null || is_shell_script "${FILE:?}"; then
               echo "Currently scanning: $FILE"
               STATUS=0
               if test "${{ runner.os }}" = 'Windows'; then
