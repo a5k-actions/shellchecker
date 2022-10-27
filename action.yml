@@ -124,8 +124,10 @@ runs:
 
         is_shell_script()
         {
+          # These aren't supported: csh tcsh mksh oksh
+          # This is supported only by old versions (for example v0.3.5): zsh
           test '#!' = "$(head -qc 2 -- "${1:?}")" || return "${?}"
-          head -qn 1 -- "${1:?}" | grep -qm 1 -e '[ak]sh$' -- || return "${?}"
+          head -qn 1 -- "${1:?}" | grep -qw -m 1 -e 'sh\|ash\|dash\|bash\|bats\|ksh\|zsh' -- || return "${?}"
         }
 
         scan_files()
