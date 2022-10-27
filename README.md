@@ -26,7 +26,7 @@ It works under Ubuntu, macOS and Windows runners.
 ```yaml
 ---
 name: "Code linting"
-
+permissions: {}
 on: [push, pull_request, workflow_dispatch]
 
 jobs:
