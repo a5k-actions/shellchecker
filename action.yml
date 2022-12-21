@@ -104,7 +104,7 @@ runs:
           SHELLCHECK_OPTS+=' -S${{ inputs.severity }}'
         fi
         if test '${{ github.event_name }}' = 'pull_request'; then
-          SHELLCHECK_OPTS+=' --norc -e1091'
+          SHELLCHECK_OPTS+=' -e1091'
         else
           SHELLCHECK_OPTS+=' -x'
           if test '${{ inputs.enable-all-opt-checks }}' != 'false'; then
