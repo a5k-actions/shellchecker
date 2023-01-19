@@ -96,7 +96,7 @@ runs:
         set -o pipefail || true
 
         PATH="${{ github.action_path }}:${PATH:?}"
-        hash shellcheck
+        command -v shellcheck
         shellcheck --version
 
         SHELLCHECK_OPTS='-C'
