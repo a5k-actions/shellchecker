@@ -6,6 +6,7 @@
 
 # ShellChecker
 
+[![REUSE status](https://api.reuse.software/badge/github.com/a5k-actions/shellchecker)](https://api.reuse.software/info/github.com/a5k-actions/shellchecker)
 [![License: LGPL-3.0-or-later](https://img.shields.io/badge/license-LGPL--3.0%2B-blue)](https://www.gnu.org/licenses/lgpl-3.0.html)
 [![GitHub release](https://img.shields.io/github/v/release/a5k-actions/shellchecker)](https://github.com/a5k-actions/shellchecker/releases/latest)
 
