@@ -1,19 +1,19 @@
 ---
 # SPDX-FileCopyrightText: none
 # SPDX-License-Identifier: CC0-1.0
-# SPDX-FileType: SOURCE
-name: "REUSE Compliance Check"
-on:
-  - push
-  - pull_request
-  - workflow_dispatch
+
+name: "REUSE"
+permissions: {}
+on: [push, pull_request, workflow_dispatch]
+
 jobs:
   reuse:
-    name: "REUSE Compliance Check"
+    name: "REUSE compliance check"
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
-      - name: "Check out code"
+      - name: "Checkout sources"
         uses: actions/checkout@v4
-      - name: "REUSE Compliance Check"
+      - name: "REUSE compliance check"
         uses: fsfe/reuse-action@v5
