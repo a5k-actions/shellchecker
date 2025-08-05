@@ -1,7 +1,6 @@
 ---
 # SPDX-FileCopyrightText: none
 # SPDX-License-Identifier: CC0-1.0
-# SPDX-FileType: SOURCE
 
 version: 2
 updates:
@@ -9,3 +8,4 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    open-pull-requests-limit: 2
