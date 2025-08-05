@@ -22,11 +22,11 @@ It works under Ubuntu, macOS and Windows runners.
 
 ## Usage example
 
-<sub>_.github/workflows/code-linting.yml_ :</sub>
+<sub>_.github/workflows/code-lint.yml_ :</sub>
 
 ```yaml
 ---
-name: "Code linting"
+name: "Code lint"
 permissions: {}
 on: [push, pull_request, workflow_dispatch]
 
@@ -34,11 +34,11 @@ jobs:
   shellchecker:
     name: "ShellChecker"
     runs-on: ubuntu-latest
-    permissions: {}
+    timeout-minutes: 15
 
     steps:
-      - name: "Check out code"
-        uses: actions/checkout@v3
+      - name: "Checkout sources"
+        uses: actions/checkout@v4
       - name: "ShellChecker"
         uses: a5k-actions/shellchecker@v0
 ```
