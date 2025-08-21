@@ -2,25 +2,35 @@
 # SPDX-FileCopyrightText: NONE
 # SPDX-License-Identifier: CC0-1.0
 
-name: "Update tags"
+name: "Tags"
+permissions: {}
 on:
   push:
     tags:
-      - v[0-9]+.[0-9]+.[0-9]+
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-*"
+
 jobs:
-  tags-updater:
-    name: "Update tags"
+  update-release-tags:
+    name: "Update release tags"
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: "${{ github.repository_id }}-${{ github.workflow }}-tags-update"
+      cancel-in-progress: false
+    permissions:
+      contents: write
 
     steps:
-      - name: "Check out code"
+      - name: "Checkout sources"
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
-      - name: "Update tags"
+      - name: "Update major version and latest tags"
         uses: bewuethr/release-tracker-action@v1
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
           update-latest: true
           update-minor: false
+          prepend-v: true
