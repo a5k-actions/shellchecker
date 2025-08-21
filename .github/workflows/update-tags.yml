@@ -8,29 +8,25 @@ on:
   push:
     tags:
       - "v[0-9]+.[0-9]+.[0-9]+"
-      - "v[0-9]+.[0-9]+.[0-9]+-*"
+      - "v[0-9]+.[0-9]+.[0-9]+.[0-9]+"
 
 jobs:
-  update-release-tags:
-    name: "Update release tags"
+  update-tag:
+    name: "Update the major tag to ${{ github.ref_name }}"
+    environment:
+      name: "Release"
+      url: "https://github.com/marketplace/actions/shellchecker"
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    if: "${{ github.run_attempt == '1' && github.ref_type == 'tag' && github.ref_name != '' }}"
     concurrency:
-      group: "${{ github.repository_id }}-${{ github.workflow }}-tags-update"
+      group: "${{ github.repository_id }}-${{ github.workflow }}-tag-update"
       cancel-in-progress: false
     permissions:
       contents: write
 
     steps:
-      - name: "Checkout sources"
-        uses: actions/checkout@v5
+      - name: "Update the major tag"
+        uses: actions/publish-action@v0.3.0
         with:
-          fetch-depth: 0
-      - name: "Update major version and latest tags"
-        uses: bewuethr/release-tracker-action@v1
-        env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        with:
-          update-latest: true
-          update-minor: false
-          prepend-v: true
+          source-tag: "${{ github.ref_name }}"
