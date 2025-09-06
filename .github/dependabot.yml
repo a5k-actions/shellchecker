@@ -9,6 +9,6 @@ updates:
     schedule:
       interval: "daily"
     commit-message:
-      prefix: "update"
+      prefix: "build"
       include: "scope"
     open-pull-requests-limit: 1
