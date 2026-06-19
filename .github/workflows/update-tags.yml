@@ -27,6 +27,6 @@ jobs:
 
     steps:
       - name: "Update the major tag"
-        uses: actions/publish-action@6be3a9527e3732c5b4d01550145826365d2ab261 # v0.4.0 + 2 commits
+        uses: actions/publish-action@c083a9508c0aaac286daaf37695452a7e643d642 # v0.4.0 + 2 commits
         with:
           source-tag: "${{ github.ref_name }}"
