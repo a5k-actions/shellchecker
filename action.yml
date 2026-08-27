@@ -63,7 +63,7 @@ runs:
         SHELLCHECK_VER: "${{ inputs.shellcheck-version }}"
       run: |
         # Downloading ShellCheck...
-        BASE_LINE='62'
+        BASE_LINE='66'
         annotate_error()
         {
           LINE="$(("${BASH_LINENO[0]}" + "${BASE_LINE}" - 2))"
